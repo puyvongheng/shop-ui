@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop with DummyJSON API</title>
+
+  <!-- Bulma -->
+  <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet" />
+
+  <!-- AOS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
+
+  <!-- Animate.css -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
+
+  <!-- Hover.css -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.3.2/css/hover-min.css" rel="stylesheet" />
+
+  <!-- Magic CSS -->
+  <link href="https://cdn.jsdelivr.net/gh/miniMAC/magic@1.1.0/magic.min.css" rel="stylesheet" />
+
+  <!-- Remix Icon -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background: linear-gradient(to right, #f9f9f9, #e0f7fa);
+      padding: 2rem;
+    }
+    .product-img {
+      width: 100%;
+      border-radius: 8px;
+      height: 200px;
+      object-fit: cover;
+    }
+    #cart-icon {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      font-size: 32px;
+      color: #ff4081;
+    }
+    .card:hover {
+      transform: scale(1.03);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Cart Icon -->
+<div id="cart-icon">
+  <i class="ri-shopping-cart-2-fill"></i>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h1 class="title has-text-centered magic puffIn">🛒 DummyJSON Products</h1>
+    <div id="product-container" class="columns is-multiline"></div>
+  </div>
+</section>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script>
+  AOS.init();
+
+  async function loadProducts() {
+    const response = await fetch("https://dummyjson.com/products?limit=12");
+    const data = await response.json();
+    const container = document.getElementById("product-container");
+
+    data.products.forEach((product, i) => {
+      const col = document.createElement("div");
+      col.className = "column is-6-mobile is-4-tablet is-3-desktop";
+      col.setAttribute("data-aos", "fade-up");
+      col.setAttribute("data-aos-delay", i * 100);
+
+      col.innerHTML = `
+        <div class="card hvr-float-shadow magic spaceInDown">
+          <div class="card-image">
+            <figure class="image is-4by3">
+              <img src="${product.thumbnail}" class="product-img" alt="${product.title}" />
+            </figure>
+          </div>
+          <div class="card-content has-text-centered">
+            <p class="title is-6">${product.title}</p>
+            <p class="subtitle is-6 has-text-danger">$${product.price}</p>
+            <button class="button is-danger is-small is-fullwidth hvr-grow" onclick="flyToCart(this.closest('.card').querySelector('img'))">
+              <i class="ri-shopping-cart-2-fill"></i> &nbsp; Add to Cart
+            </button>
+          </div>
+        </div>
+      `;
+      container.appendChild(col);
+    });
+  }
+
+  function flyToCart(imgElement) {
+    const cart = document.getElementById("cart-icon");
+    const imgRect = imgElement.getBoundingClientRect();
+    const cartRect = cart.getBoundingClientRect();
+    const imgClone = imgElement.cloneNode(true);
+
+    imgClone.style.position = "fixed";
+    imgClone.style.left = imgRect.left + "px";
+    imgClone.style.top = imgRect.top + "px";
+    imgClone.style.width = imgRect.width + "px";
+    imgClone.style.zIndex = 1000;
+    imgClone.style.transition = "all 0.8s ease-in-out";
+    document.body.appendChild(imgClone);
+
+    setTimeout(() => {
+      imgClone.style.left = cartRect.left + "px";
+      imgClone.style.top = cartRect.top + "px";
+      imgClone.style.width = "0px";
+      imgClone.style.opacity = 0;
+    }, 10);
+
+    setTimeout(() => {
+      document.body.removeChild(imgClone);
+    }, 900);
+  }
+
+  loadProducts();
+</script>
+
+</body>
+</html>
